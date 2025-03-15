@@ -39,8 +39,5 @@ python files/main.py
 │   │── main.py
 ```
 
-## ⚠️ Uwaga!
-Nie wrzucaj folderu `.venv/`, `__pycache__/` i `.idea/` do repozytorium. Są one generowane lokalnie i nie są potrzebne innym użytkownikom.
-
 Miłej pracy! 🚀
 
