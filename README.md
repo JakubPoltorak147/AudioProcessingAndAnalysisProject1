@@ -34,6 +34,8 @@ python files/main.py
 │── requirements.txt
 │── files/
 │   │── audio_app.py
+│   │── audio_processing.py
+│   │── design.py
 │   │── features.py
 │   │── features_window.py
 │   │── main.py
