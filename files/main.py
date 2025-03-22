@@ -1,12 +1,12 @@
-# main.py
 from tkinter import Tk
 from audio_app import AudioApp
 import sys
 
 def main():
     root = Tk()
-    root.title("Aplikacja Audio")
+    root.title("Aplikacja Audio - Pastelowa Edycja")
     root.geometry("900x700")
+
     app = AudioApp(root)
     root.protocol("WM_DELETE_WINDOW", app.on_close)
     root.mainloop()

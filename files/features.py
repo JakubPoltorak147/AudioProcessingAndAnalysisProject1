@@ -1,33 +1,25 @@
-# features.py
 import numpy as np
 
 def compute_volume(frame):
-    """Volume – pierwiastek średniej energii sygnału w ramce."""
-    return np.sqrt(np.mean(frame**2))
+    return np.sqrt(np.mean(frame**2)) if len(frame) > 0 else 0.0
 
 def compute_ste(frame):
-    """Short Time Energy (STE) – suma kwadratów wartości sygnału w ramce, podzielona przez długość ramki."""
-    return np.sum(frame**2) / len(frame)
+    return np.sum(frame**2) / len(frame) if len(frame) > 0 else 0.0
 
 def compute_zcr(frame):
-    """Zero Crossing Rate (ZCR) – liczba przejść sygnału przez zero, znormalizowana przez długość ramki."""
+    if len(frame) == 0:
+        return 0.0
     zero_crossings = np.count_nonzero(np.diff(np.sign(frame)))
     return zero_crossings / len(frame)
 
 def compute_sr(frame, vol_threshold=0.01, zcr_threshold=0.1):
-    """
-    Silent Ratio (SR) – ramka jest klasyfikowana jako cisza, jeśli zarówno volume jak i ZCR
-    są poniżej zadanych progów. Zwraca 1 (cisza) lub 0.
-    """
     vol = compute_volume(frame)
     zcr = compute_zcr(frame)
     return 1 if (vol < vol_threshold and zcr < zcr_threshold) else 0
 
-def compute_f0(frame, fs, fmin=50, fmax=500):
-    """
-    Fundamental Frequency (F0) – estymacja częstotliwości tonu podstawowego przy użyciu autokorelacji.
-    Zwraca F0 w Hz lub 0, jeśli nie znaleziono wyraźnego piku.
-    """
+def compute_autocorr_f0(frame, fs, fmin=50, fmax=500):
+    if len(frame) == 0:
+        return 0
     frame = frame - np.mean(frame)
     corr = np.correlate(frame, frame, mode='full')
     corr = corr[len(corr)//2:]
@@ -36,7 +28,44 @@ def compute_f0(frame, fs, fmin=50, fmax=500):
     if len(start) == 0:
         return 0
     lag = start[0]
-    f0 = fs / lag if lag != 0 else 0
+    if lag == 0:
+        return 0
+    f0 = fs / lag
+    if f0 < fmin or f0 > fmax:
+        return 0
+    return f0
+
+def compute_amdf(frame):
+    length = len(frame)
+    if length == 0:
+        return np.array([0])
+    amdf = []
+    for tau in range(length):
+        diff_sum = 0.0
+        for n in range(length - tau):
+            diff_sum += abs(frame[n] - frame[n + tau])
+        amdf.append(diff_sum / (length - tau))
+    return np.array(amdf)
+
+def compute_amdf_f0(frame, fs, fmin=50, fmax=500):
+    length = len(frame)
+    if length == 0:
+        return 0
+    frame = frame - np.mean(frame)
+    amdf_values = compute_amdf(frame)
+
+    min_lag = int(fs // fmax)
+    max_lag = int(fs // fmin) if fmin != 0 else length // 2
+    if max_lag > len(amdf_values):
+        max_lag = len(amdf_values) - 1
+    if min_lag < 1 or min_lag >= max_lag:
+        return 0
+
+    lag_range = np.arange(min_lag, max_lag)
+    best_lag = lag_range[np.argmin(amdf_values[min_lag:max_lag])]
+    if best_lag == 0:
+        return 0
+    f0 = fs / best_lag
     if f0 < fmin or f0 > fmax:
         return 0
     return f0

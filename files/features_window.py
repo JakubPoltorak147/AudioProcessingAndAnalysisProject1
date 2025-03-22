@@ -1,67 +1,124 @@
-# features_window.py
 import tkinter as tk
-from tkinter import ttk
+import numpy as np
 import matplotlib
-
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-from features import compute_volume, compute_ste, compute_zcr, compute_sr, compute_f0
 
+from features import (
+    compute_volume, compute_ste, compute_zcr, compute_sr,
+    compute_autocorr_f0, compute_amdf_f0
+)
+from design import ColorScheme
 
 class FeaturesWindow:
     def __init__(self, master, data, fs, frame_size, silence_threshold):
         self.top = tk.Toplevel(master)
-        self.top.title("Wykresy cech sygnału")
-        self.top.geometry("1200x800")
-        self.top.configure(bg="#ffffff")
+        self.top.title("Wykresy cech sygnału - Pastelowy Design")
+        self.top.geometry("1000x800")
+
+        # Pastelowe tło
+        self.main_bg_color = ColorScheme.MAIN_BG
+        self.top.configure(bg=self.main_bg_color)
+
+        # Główna ramka
+        self.main_frame = tk.Frame(self.top, bg=self.main_bg_color)
+        self.main_frame.pack(fill="both", expand=True)
+
+        # Kopiujemy dane
         self.data = data
         self.fs = fs
         self.frame_size = frame_size
         self.silence_threshold = silence_threshold
 
-        # Oblicz cechy ramkowe
-        self.frames, self.times = self.frame_signal(self.data, self.fs, self.frame_size)
-        self.volume = np.array([compute_volume(frame) for frame in self.frames])
-        self.ste = np.array([compute_ste(frame) for frame in self.frames])
-        self.zcr = np.array([compute_zcr(frame) for frame in self.frames])
-        self.sr = np.array([compute_sr(frame) for frame in self.frames])
-        self.f0 = np.array([compute_f0(frame, self.fs) for frame in self.frames])
+        # Dzielimy sygnał na ramki i obliczamy cechy
+        self.frames, self.times = self.frame_signal(data, fs, frame_size)
+        self.volume = np.array([compute_volume(f) for f in self.frames])
+        self.ste = np.array([compute_ste(f) for f in self.frames])
+        self.zcr = np.array([compute_zcr(f) for f in self.frames])
+        self.sr = np.array([compute_sr(f) for f in self.frames])
+        self.f0_autocorr = np.array([compute_autocorr_f0(f, fs) for f in self.frames])
+        self.f0_amdf = np.array([compute_amdf_f0(f, fs) for f in self.frames])
 
-        # Utwórz przewijalny obszar na pełnym oknie
-        container = ttk.Frame(self.top)
-        container.pack(fill="both", expand=True)
-        canvas = tk.Canvas(container, bg="#ffffff")
-        scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = ttk.Frame(canvas)
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
+        # Przechowujemy cechy
+        self.features_info = {
+            "Volume (RMS)": (
+                self.volume,
+                "Volume określa średnią głośność sygnału (RMS).",
+                "#4DB6AC"
+            ),
+            "STE": (
+                self.ste,
+                "Short Time Energy – rozróżnianie fragmentów dźwięcznych/bezdźwięcznych.",
+                "#81C784"
+            ),
+            "ZCR": (
+                self.zcr,
+                "Zero Crossing Rate – liczba przejść przez zero.",
+                "#FFF176"
+            ),
+            "SR (Silent Ratio)": (
+                self.sr,
+                "1 oznacza ramkę sklasyfikowaną jako cisza.",
+                "#FFD54F"
+            ),
+            "F0 (Autocorr)": (
+                self.f0_autocorr,
+                "Częstotliwość podstawowa - metoda autokorelacji.",
+                "#BA68C8"
+            ),
+            "F0 (AMDF)": (
+                self.f0_amdf,
+                "Częstotliwość podstawowa - metoda AMDF.",
+                "#FF8A65"
+            ),
+        }
+
+        # Panel wyboru cech
+        self.select_frame = tk.Frame(self.main_frame, bg=self.main_bg_color)
+        self.select_frame.pack(side="top", fill="x", padx=10, pady=10)
+
+        tk.Label(
+            self.select_frame,
+            text="Wybierz cechy do wyświetlenia:",
+            bg=self.main_bg_color,
+            fg="#1B5E20",
+            font=("Helvetica", 11, "bold")
+        ).pack(side="left", anchor="n")
+
+        self.feature_vars = {}
+        for feat_name in self.features_info.keys():
+            var = tk.BooleanVar(value=True)
+            cb = tk.Checkbutton(
+                self.select_frame,
+                text=feat_name,
+                variable=var,
+                bg=self.main_bg_color,
+                highlightthickness=0,
+                font=("Helvetica", 9)
             )
-        )
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+            cb.pack(side="left", padx=5)
+            self.feature_vars[feat_name] = var
 
-        # Rysujemy duże wykresy cech z opisami
-        self.plot_feature(self.times, self.volume, "Volume (RMS)",
-                          "Volume określa średnią głośność sygnału, obliczaną jako pierwiastek średniej energii ramki.",
-                          row=0, color="#1E88E5")
-        self.plot_feature(self.times, self.ste, "Short Time Energy (STE)",
-                          "STE to suma kwadratów wartości sygnału w ramce, pomagająca odróżnić fragmenty dźwięczne od bezdźwięcznych.",
-                          row=1, color="#43A047")
-        self.plot_feature(self.times, self.zcr, "Zero Crossing Rate (ZCR)",
-                          "ZCR to liczba przejść sygnału przez zero – miara przydatna w wykrywaniu bezdźwięcznych fragmentów mowy.",
-                          row=2, color="#FDD835")
-        self.plot_feature(self.times, self.sr, "Silent Ratio (SR)",
-                          "SR klasyfikuje ramkę jako ciszę, gdy zarówno volume, jak i ZCR są poniżej ustalonych progów.",
-                          row=3, color="#E53935")
-        self.plot_feature(self.times, self.f0, "Fundamental Frequency (F0)",
-                          "F0 to szacowana częstotliwość tonu podstawowego, wyznaczana metodą autokorelacji.", row=4,
-                          color="#8E24AA")
+        self.draw_button = tk.Button(
+            self.select_frame,
+            text="Rysuj",
+            command=self.draw_selected_features,
+            bg="#B2DFDB",
+            fg="#004D40",
+            activebackground="#80CBC4",
+            font=("Helvetica", 9, "bold")
+        )
+        self.draw_button.pack(side="left", padx=10)
+
+        self.plot_frame = tk.Frame(self.main_frame, bg=self.main_bg_color)
+        self.plot_frame.pack(fill="both", expand=True, padx=10, pady=(0,10))
+
+        self.fig = None
+        self.canvas = None
+
+        self.draw_selected_features()
 
     def frame_signal(self, data, fs, frame_size):
         total_samples = len(data)
@@ -78,21 +135,55 @@ class FeaturesWindow:
             times.append(start / fs)
         return frames, np.array(times)
 
-    def plot_feature(self, times, feature, title, description, row, color):
-        # Ustawiamy wykres na całą szerokość (szerokość w pixelach dobieramy dynamicznie – przykładowo 1100px)
-        fig = plt.Figure(figsize=(12, 3), dpi=80)
-        ax = fig.add_subplot(111)
-        ax.plot(times, feature, color=color, linewidth=1.5)
-        ax.set_title(title, fontsize=12)
-        ax.set_xlabel("Czas [s]", fontsize=10)
-        ax.set_ylabel(title, fontsize=10)
-        ax.grid(True)
+    def draw_selected_features(self):
+        selected_features = [name for name, var in self.feature_vars.items() if var.get()]
 
-        canvas = FigureCanvasTkAgg(fig, master=self.scrollable_frame)
-        canvas.draw()
-        canvas.get_tk_widget().grid(row=row * 2, column=0, padx=10, pady=5, sticky="nsew")
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()
+            self.canvas = None
+        if self.fig:
+            plt.close(self.fig)
+            self.fig = None
 
-        # Etykieta z opisem cechy
-        label = tk.Label(self.scrollable_frame, text=description, font=("Helvetica", 10), bg="#ffffff", wraplength=1100,
-                         justify="left")
-        label.grid(row=row * 2 + 1, column=0, padx=10, pady=(0, 10), sticky="w")
+        if not selected_features:
+            info_label = tk.Label(
+                self.plot_frame,
+                text="Nie wybrano żadnych cech do wyświetlenia!",
+                bg=self.main_bg_color,
+                fg="#B71C1C",
+                font=("Helvetica", 12, "bold")
+            )
+            info_label.pack()
+            return
+
+        self.fig = plt.Figure(figsize=(12, 6), dpi=100)
+
+        n_feats = len(selected_features)
+        rows, cols = self.calc_subplot_grid(n_feats)
+
+        for i, feat_name in enumerate(selected_features, start=1):
+            ax = self.fig.add_subplot(rows, cols, i)
+            data_array, description, color_line = self.features_info[feat_name]
+            ax.plot(self.times, data_array, linewidth=1.5, color=color_line, alpha=0.9)
+            ax.set_title(feat_name, fontsize=10, fontweight="bold", color="#2E7D32")
+            ax.set_xlabel("Czas [s]", fontsize=9)
+            ax.set_ylabel(feat_name, fontsize=9)
+            ax.grid(True)
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.plot_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def calc_subplot_grid(self, n):
+        if n == 1:
+            return (1, 1)
+        elif n == 2:
+            return (1, 2)
+        elif n == 3:
+            return (1, 3)
+        elif n == 4:
+            return (2, 2)
+        elif n <= 6:
+            return (2, 3)
+        else:
+            return (2, 3)
