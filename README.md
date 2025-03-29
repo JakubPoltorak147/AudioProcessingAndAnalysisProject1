@@ -1,4 +1,4 @@
-# Aplikacja Audio — Przetwarzanie i Analiza Dźwięku
+# Aplikacja Audio — Analiza i Przetwarzanie Dźwięku
 
 Niniejsze repozytorium zawiera aplikację napisaną w Pythonie, służącą do wczytywania, odtwarzania oraz podstawowej analizy sygnałów dźwiękowych w formacie `.wav`. Aplikacja zapewnia graficzny interfejs użytkownika (GUI) wykorzystujący bibliotekę **Tkinter**.
 
