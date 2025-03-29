@@ -79,3 +79,32 @@ Dodatkowo w folderze **audio_files** można umieścić własne pliki WAV do test
    ```bash
    python main.py
    ```
+
+# Aplikacja GUI
+
+Po uruchomieniu aplikacji pojawi się główne okno GUI, w którym można:
+
+- **Wczytać plik WAV** (przycisk: "Wczytaj plik WAV")
+- **Odtwarzać, pauzować i zatrzymywać dźwięk**
+- **Analizować cechy sygnału** (przycisk: "Wykresy cech")
+- **Zamknąć aplikację**
+
+---
+
+## 📑 Dokumentacja
+
+Plik `AiPD_dokumentacja_Jakub_Poltorak.pdf` zawiera rozszerzoną dokumentację opisującą szczegółowo:
+
+- Architekturę aplikacji
+- Opis poszczególnych modułów i funkcji
+- Przykłady użycia i analizy
+
+---
+
+## 🤝 Wkład
+
+Projekt opracowany przez **JakubPoltorak147**.  
+Wszelkie uwagi, sugestie i poprawki mile widziane w formie Issues lub Pull Requests.
+
+Miłej pracy! 🚀
+
