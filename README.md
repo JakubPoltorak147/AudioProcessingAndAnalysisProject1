@@ -55,8 +55,8 @@ Dodatkowo w folderze **audio_files** można umieścić własne pliki WAV do test
    ```bash
    git clone https://github.com/JakubPoltorak147/AudioProcessingAndAnalysisProject1.git
    cd AudioProcessingAndAnalysisProject1
-   ```  
- 2.  **Stworzenie i aktywacja wirtualnego środowiska (opcjonalnie, zalecane):**
+   ```
+2.  **Stworzenie i aktywacja wirtualnego środowiska (opcjonalnie, zalecane):**
    ```bash
    python -m venv .venv
    # Linux / macOS
@@ -68,4 +68,14 @@ Dodatkowo w folderze **audio_files** można umieścić własne pliki WAV do test
 3. **Instalacja zależnych pakietów:**
    ```bash
    pip install -r requirements.txt
-   ``` 
+   ```
+
+## 🚀 Uruchamianie aplikacji
+1. **Przejdź do folderu z plikiem `main.py`:**
+   ```bash
+   cd files
+   ```
+2. **Uruchom aplikację:**
+   ```bash
+   python main.py
+   ```
