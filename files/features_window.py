@@ -12,10 +12,28 @@ from features import (
 )
 from design import ColorScheme
 
+def auto_frame_size(total_samples, max_frames=2000):
+
+    frame_size = max(256, int(np.ceil(total_samples / max_frames)))
+    return frame_size
+
+def downsample_block(x, y, max_points=2000):
+
+    n = len(x)
+    if n <= max_points:
+        return x, y
+    block_size = int(np.ceil(n / max_points))
+    # Podziel dane na bloki
+    x_blocks = [x[i*block_size : (i+1)*block_size] for i in range(int(np.ceil(n / block_size)))]
+    y_blocks = [y[i*block_size : (i+1)*block_size] for i in range(int(np.ceil(n / block_size)))]
+    x_ds = np.array([np.mean(block) for block in x_blocks])
+    y_ds = np.array([np.mean(block) for block in y_blocks])
+    return x_ds, y_ds
+
 class FeaturesWindow:
     def __init__(self, master, data, fs, frame_size, silence_threshold):
         self.top = tk.Toplevel(master)
-        self.top.title("Wykresy cech sygnału - Pastelowy Design")
+        self.top.title("Wykresy cech sygnału")
         self.top.geometry("1000x800")
 
         # Pastelowe tło
@@ -26,14 +44,16 @@ class FeaturesWindow:
         self.main_frame = tk.Frame(self.top, bg=self.main_bg_color)
         self.main_frame.pack(fill="both", expand=True)
 
-        # Kopiujemy dane
         self.data = data
         self.fs = fs
-        self.frame_size = frame_size
+
+        # Automatyczne dobranie rozmiaru ramki – dla długich nagrań zwiększamy ją, aby liczba ramek nie była zbyt duża.
+        candidate = auto_frame_size(len(data))
+        self.frame_size = min(candidate, frame_size)  # wybieramy większą z tych wartości
         self.silence_threshold = silence_threshold
 
         # Dzielimy sygnał na ramki i obliczamy cechy
-        self.frames, self.times = self.frame_signal(data, fs, frame_size)
+        self.frames, self.times = self.frame_signal(data, fs, self.frame_size)
         self.volume = np.array([compute_volume(f) for f in self.frames])
         self.ste = np.array([compute_ste(f) for f in self.frames])
         self.zcr = np.array([compute_zcr(f) for f in self.frames])
@@ -113,11 +133,12 @@ class FeaturesWindow:
         self.draw_button.pack(side="left", padx=10)
 
         self.plot_frame = tk.Frame(self.main_frame, bg=self.main_bg_color)
-        self.plot_frame.pack(fill="both", expand=True, padx=10, pady=(0,10))
+        self.plot_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         self.fig = None
         self.canvas = None
 
+        # Rysujemy wykresy przy starcie
         self.draw_selected_features()
 
     def frame_signal(self, data, fs, frame_size):
@@ -157,14 +178,18 @@ class FeaturesWindow:
             return
 
         self.fig = plt.Figure(figsize=(12, 6), dpi=100)
+        self.fig.set_tight_layout(True)
 
         n_feats = len(selected_features)
         rows, cols = self.calc_subplot_grid(n_feats)
 
+        # Dla każdej cechy agregujemy dane, by rysować mniej punktów
         for i, feat_name in enumerate(selected_features, start=1):
             ax = self.fig.add_subplot(rows, cols, i)
             data_array, description, color_line = self.features_info[feat_name]
-            ax.plot(self.times, data_array, linewidth=1.5, color=color_line, alpha=0.9)
+            # Używamy funkcji downsample_block, by zredukować liczbę punktów
+            x_plot, y_plot = downsample_block(self.times, data_array, max_points=2000)
+            ax.plot(x_plot, y_plot, linewidth=1.0, color=color_line, rasterized=True)
             ax.set_title(feat_name, fontsize=10, fontweight="bold", color="#2E7D32")
             ax.set_xlabel("Czas [s]", fontsize=9)
             ax.set_ylabel(feat_name, fontsize=9)
