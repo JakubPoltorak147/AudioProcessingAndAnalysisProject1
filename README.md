@@ -4,19 +4,21 @@ Niniejsze repozytorium zawiera aplikację napisaną w Pythonie, służącą do w
 
 ## 📂 Struktura projektu
 ```
-/AudioProcessingAndAnalysisProject1/
- │── audio_files/
- │   │── ... (opcjonalnie pliki .wav używane w projekcie)
- │── files/
- │   │── audio_app.py # Moduł z klasą AudioApp (GUI, odtwarzanie, wykres przebiegu)
- │   │── audio_processing.py  # Klasy do przetwarzania audio (np. detekcja ciszy, dźwięczności)
- │   │── design.py # Klasy i funkcje definiujące styl, kolory w GUI
- │   │── features.py # Funkcje obliczające cechy sygnału (RMS, ZCR, STE, F0, itp.)
- │   │── features_window.py # Moduł z klasą FeaturesWindow do wyświetlania wykresów cech
- │   │── main.py # Główny punkt startowy aplikacji
- │── .gitignore
- │── README.md
- │── requirements.txt
+AudioProcessingAndAnalysisProject1/
+├── audio_files/
+│   └── ... (opcjonalnie pliki .wav używane w projekcie)
+├── files/
+│   ├── main.py                 # Główny punkt startowy aplikacji
+│   ├── audio_app.py            # Moduł z klasą AudioApp (GUI, odtwarzanie, wykres przebiegu)
+│   ├── audio_processing.py     # Klasy do przetwarzania audio (np. detekcja ciszy, dźwięczności)
+│   ├── design.py               # Klasy i funkcje definiujące styl, kolory w GUI
+│   ├── features.py             # Funkcje obliczające cechy sygnału (RMS, ZCR, STE, F0, itp.)
+│   ├── features_window.py      # Moduł z klasą FeaturesWindow do wyświetlania wykresów cech
+├── AiPD_dokumentacja_Jakub_Poltorak.pdf  # Dokumentacja projektu
+├── .gitignore
+├── README.md                   # Niniejszy plik (informacje o uruchamianiu i strukturze)
+└── requirements.txt            # Lista zależności (pip)
+
 ```
 
 ## 💡 Opis aplikacji
