@@ -55,3 +55,16 @@ Dodatkowo w folderze **audio_files** można umieścić własne pliki WAV do test
    ```bash
    git clone https://github.com/JakubPoltorak147/AudioProcessingAndAnalysisProject1.git
    cd AudioProcessingAndAnalysisProject1
+
+ 2.  **Stworzenie i aktywacja wirtualnego środowiska (opcjonalnie, zalecane):**
+   ```bash
+   python -m venv .venv
+   # Linux / macOS
+   source .venv/bin/activate
+   # Windows
+   .venv\Scripts\activate
+
+3. **Instalacja zależnych pakietów:**
+   ```bash
+   pip install -r requirements.txt
+    
