@@ -3,7 +3,7 @@
 Niniejsze repozytorium zawiera aplikację napisaną w Pythonie, służącą do wczytywania, odtwarzania oraz podstawowej analizy sygnałów dźwiękowych w formacie `.wav`. Aplikacja zapewnia graficzny interfejs użytkownika (GUI) wykorzystujący bibliotekę **Tkinter**.
 
 ## 📂 Struktura projektu
-
+```
 /AudioProcessingAndAnalysisProject1/
  │── audio_files/
  │   │── ... (opcjonalnie pliki .wav używane w projekcie)
@@ -17,6 +17,7 @@ Niniejsze repozytorium zawiera aplikację napisaną w Pythonie, służącą do w
  │── .gitignore
  │── README.md
  │── requirements.txt
+```
 
 ## 💡 Opis aplikacji
 
