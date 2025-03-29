@@ -35,8 +35,8 @@ Aplikacja umożliwia:
 3. **Wizualizacja przebiegu:**  
    Na głównym wykresie przedstawiany jest czasowy przebieg amplitudy sygnału.  
    Opcjonalnie, można zaznaczać:
-   - Fragmenty _ciszy_ (kolor żółty),  
-   - Fragmenty _dźwięczne_ (kolor niebieski) oraz _bezdźwięczne_ (kolor różowy).
+   - Fragmenty _ciszy_ (kolor pomarańczowo-różowy),  
+   - Fragmenty _dźwięczne_ (kolor zielony) oraz _bezdźwięczne_ (kolor różowy).
 
 4. **Analiza cech sygnału (Wykresy cech):**  
    Aplikacja pozwala otworzyć dodatkowe okno (**Wykresy cech**) z wykresami:
